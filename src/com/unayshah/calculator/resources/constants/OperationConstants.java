@@ -1,4 +1,4 @@
-package resources.constants;
+package com.unayshah.calculator.resources.constants;
 
 public interface OperationConstants {
 	public final String SYMBOL_DIVIDE = "/";

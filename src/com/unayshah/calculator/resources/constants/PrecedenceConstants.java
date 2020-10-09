@@ -1,4 +1,4 @@
-package resources.constants;
+package com.unayshah.calculator.resources.constants;
 
 public interface PrecedenceConstants {
 	public final Integer PRECEDENCE_DIVIDE = 0;

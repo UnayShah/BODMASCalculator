@@ -1,10 +1,10 @@
-package main.calculator;
+package com.unayshah.calculator;
 
 import java.util.Stack;
 
-import main.operation.OperationFactory;
-import main.operation.OperationImpl;
-import resources.constants.OperationConstants;
+import com.unayshah.calculator.resources.constants.OperationConstants;
+import com.unayshah.operation.OperationFactory;
+import com.unayshah.operation.OperationImpl;
 
 public class CalculatorImpl implements ICalculator {
 	Stack<String> operations;

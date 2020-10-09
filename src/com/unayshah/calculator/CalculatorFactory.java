@@ -1,4 +1,4 @@
-package main.calculator;
+package com.unayshah.calculator;
 
 public class CalculatorFactory {
 	public static CalculatorImpl getInstance() {

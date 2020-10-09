@@ -1,4 +1,4 @@
-package main.calculator;
+package com.unayshah.calculator;
 
 public interface ICalculator {
 	void addOperation(String operation);

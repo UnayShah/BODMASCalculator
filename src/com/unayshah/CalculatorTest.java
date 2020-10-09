@@ -1,4 +1,7 @@
-package main.calculator;
+package com.unayshah;
+
+import com.unayshah.calculator.CalculatorFactory;
+import com.unayshah.calculator.ICalculator;
 
 public class CalculatorTest {
 	public static void main(String[] args) {

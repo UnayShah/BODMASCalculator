@@ -1,7 +1,7 @@
-package main.operation;
+package com.unayshah.operation;
 
-import resources.constants.OperationConstants;
-import resources.constants.PrecedenceConstants;
+import com.unayshah.calculator.resources.constants.OperationConstants;
+import com.unayshah.calculator.resources.constants.PrecedenceConstants;
 
 public class OperationImpl implements IOperation {
 

@@ -1,4 +1,4 @@
-package main.operation;
+package com.unayshah.operation;
 
 public interface IOperation {
 	double add(double A, double B);
