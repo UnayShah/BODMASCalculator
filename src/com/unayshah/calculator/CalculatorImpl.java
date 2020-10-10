@@ -1,5 +1,6 @@
 package com.unayshah.calculator;
 
+import java.util.EmptyStackException;
 import java.util.Stack;
 
 import com.unayshah.calculator.resources.constants.OperationConstants;
@@ -45,31 +46,37 @@ public class CalculatorImpl implements ICalculator {
 
 	public String evaluateExpression(String expression) {
 		char[] tokens = expression.toCharArray();
-
-		for (int i = 0; i < tokens.length; i++) {
-			if (tokens[i] == ' ') {
-				continue;
-			} else if (tokens[i] >= '0' && tokens[i] <= '9') {
-				i = extractOperand(i, tokens);
-			} else if (tokens[i] >= 'a' && tokens[i] <= 'z') {
-				i = extractStringOperator(i, tokens);
-			} else if (String.valueOf(tokens[i]).equals(OperationConstants.SYMBOL_PARANTHESIS_OPEN)) {
-				addOperation(String.valueOf(tokens[i]));
-			} else if (String.valueOf(tokens[i]).equals(OperationConstants.SYMBOL_PARANTHESIS_CLOSE)) {
-				evaluateExpressionOnParanthesisClose();
-			} else {
-				evaluateExpression(i, tokens);
+		try {
+			for (int i = 0; i < tokens.length; i++) {
+				if (tokens[i] == ' ') {
+					continue;
+				} else if ((tokens[i] >= '0' && tokens[i] <= '9') || tokens[i] == '.') {
+					i = extractOperand(i, tokens);
+				} else if (tokens[i] >= 'a' && tokens[i] <= 'z') {
+					i = extractStringOperator(i, tokens);
+				} else if (String.valueOf(tokens[i]).equals(OperationConstants.SYMBOL_PARANTHESIS_OPEN)) {
+					addOperation(String.valueOf(tokens[i]));
+				} else if (String.valueOf(tokens[i]).equals(OperationConstants.SYMBOL_PARANTHESIS_CLOSE)) {
+					evaluateExpressionOnParenthesisClose();
+				} else {
+					evaluateExpression(i, tokens);
+				}
 			}
+			while (!operations.isEmpty()) {
+				evaluate();
+			}
+		} catch (Exception e) {
+			return "Divide By Zero";
 		}
-		while (!operations.isEmpty()) {
-			evaluate();
-		}
-		return ConvertToIntegerIfPossible(operands.pop());
+		if (!operands.isEmpty())
+			return ConvertToIntegerIfPossible(operands.pop());
+		else
+			return "";
 	}
 
 	public int extractOperand(int i, char[] tokens) {
 		StringBuffer sbuf = new StringBuffer();
-		while (i < tokens.length && tokens[i] >= '0' && tokens[i] <= '9') {
+		while (i < tokens.length && ((tokens[i] >= '0' && tokens[i] <= '9') || (tokens[i] == '.'))) {
 			sbuf.append(tokens[i]);
 			i++;
 		}
@@ -89,74 +96,104 @@ public class CalculatorImpl implements ICalculator {
 		return i;
 	}
 
-	public void evaluateExpressionOnParanthesisClose() {
-		while (!operations.isEmpty() && !operations.peek().equals("(")) {
-			evaluate();
+	public void evaluateExpressionOnParenthesisClose() throws Exception {
+		try {
+			while (!operations.isEmpty() && !operations.peek().equals("(")) {
+				evaluate();
+			}
+		} catch (Exception e) {
+			throw new Exception();
 		}
 		if (!operations.isEmpty())
 			operations.pop();
 	}
 
-	public void evaluateExpression(int i, char[] tokens) {
-		while (!operations.isEmpty() && operationImpl.hasPrecedence(String.valueOf(tokens[i]), operations.peek())) {
-			evaluate();
+	public void evaluateExpression(int i, char[] tokens) throws Exception {
+		try {
+			while (!operations.isEmpty() && !operands.isEmpty()
+					&& operationImpl.hasPrecedence(String.valueOf(tokens[i]), operations.peek())) {
+				evaluate();
+			}
+		} catch (Exception e) {
+			throw new Exception();
 		}
+//		if(operands.isEmpty())addOperands("0");
 		addOperation(String.valueOf(tokens[i]));
 	}
 
-	public void evaluate() {
+	public void evaluate() throws Exception {
 		String operationsTemp = operations.pop();
-		switch (operationsTemp) {
-		case OperationConstants.SYMBOL_DIVIDE:
-			addOperands(String
-					.valueOf(operationImpl.divide(Double.valueOf(operands.pop()), Double.valueOf(operands.pop()))));
-			break;
-		case OperationConstants.SYMBOL_MULTIPLY:
-			addOperands(String
-					.valueOf(operationImpl.multiply(Double.valueOf(operands.pop()), Double.valueOf(operands.pop()))));
-			break;
-		case OperationConstants.SYMBOL_ADD:
-			addOperands(
-					String.valueOf(operationImpl.add(Double.valueOf(operands.pop()), Double.valueOf(operands.pop()))));
-			break;
-		case OperationConstants.SYMBOL_SUBTRACT:
-			addOperands(String
-					.valueOf(operationImpl.subtract(Double.valueOf(operands.pop()), Double.valueOf(operands.pop()))));
-			break;
-		case OperationConstants.SYMBOL_PERCENT:
-			if (!operations.isEmpty()) {
-				if (operations.peek().equals(OperationConstants.SYMBOL_ADD)) {
-					addOperands(String.valueOf(
-							operationImpl.add(1, operationImpl.divide(100.0, Double.valueOf(operands.pop())))));
-					operations.pop();
-					addOperation("*");
-				} else if (operations.peek().equals(OperationConstants.SYMBOL_SUBTRACT)) {
-					addOperands(String.valueOf(
-							operationImpl.subtract(operationImpl.divide(100.0, Double.valueOf(operands.pop())), 1)));
-					operations.pop();
-					addOperation("*");
-				} else{
-					addOperands(String.valueOf(operationImpl.divide(100.0, Double.valueOf(operands.pop()))));
-					if(!operations.peek().equals(OperationConstants.SYMBOL_MULTIPLY) && !operations.peek().equals(OperationConstants.SYMBOL_DIVIDE)) {
-						addOperands(OperationConstants.SYMBOL_MULTIPLY);
-					}
+		String operand1 = "", operand2 = "";
+		if (operands.isEmpty()) {
+			addOperation(operationsTemp);
+			return;
+		}
+		try {
+			switch (operationsTemp) {
+			case OperationConstants.SYMBOL_DIVIDE:
+				operand1 = operands.pop();
+				operand2 = operands.pop();
+				if (operand2 == "0") {
+					throw new Exception();
 				}
-				
+				addOperands(String.valueOf(operationImpl.divide(Double.valueOf(operand1), Double.valueOf(operand2))));
+				break;
+			case OperationConstants.SYMBOL_MULTIPLY:
+				operand1 = operands.pop();
+				operand2 = operands.pop();
+				addOperands(String.valueOf(operationImpl.multiply(Double.valueOf(operand1), Double.valueOf(operand2))));
+				break;
+			case OperationConstants.SYMBOL_ADD:
+				operand1 = operands.pop();
+				operand2 = operands.pop();
+				addOperands(String.valueOf(operationImpl.add(Double.valueOf(operand1), Double.valueOf(operand2))));
+				break;
+			case OperationConstants.SYMBOL_SUBTRACT:
+				operand1 = operands.pop();
+				operand2 = operands.pop();
+				addOperands(String.valueOf(operationImpl.subtract(Double.valueOf(operand1), Double.valueOf(operand2))));
+				break;
+			case OperationConstants.SYMBOL_PERCENT:
+				operand1 = operands.pop();
+				if (!operations.isEmpty()) {
+					if (operations.peek().equals(OperationConstants.SYMBOL_ADD)) {
+						addOperands(String
+								.valueOf(operationImpl.add(1, operationImpl.divide(100.0, Double.valueOf(operand1)))));
+						operations.pop();
+						addOperation("*");
+					} else if (operations.peek().equals(OperationConstants.SYMBOL_SUBTRACT)) {
+						addOperands(String.valueOf(
+								operationImpl.subtract(operationImpl.divide(100.0, Double.valueOf(operand1)), 1)));
+						operations.pop();
+						addOperation("*");
+					} else {
+						addOperands(String.valueOf(operationImpl.divide(100.0, Double.valueOf(operand1))));
+						if (!operations.peek().equals(OperationConstants.SYMBOL_MULTIPLY)
+								&& !operations.peek().equals(OperationConstants.SYMBOL_DIVIDE)) {
+							addOperands(OperationConstants.SYMBOL_MULTIPLY);
+						}
+					}
+
+				} else {
+					addOperands(String.valueOf(operationImpl.divide(100.0, Double.valueOf(operand1))));
+				}
+				break;
 			}
-			else {
-				addOperands(String.valueOf(operationImpl.divide(100.0, Double.valueOf(operands.pop()))));
-			}
-//			if (!operations.isEmpty()) {
-//				operations.pop();
-//				addOperation("*");
-//			}
-			break;
+		} catch (EmptyStackException e) {
+			System.err.println("Error");
+			addOperands(operand1);
+		} catch (Exception e) {
+			throw new Exception();
 		}
 	}
 
 	public String ConvertToIntegerIfPossible(String result) {
+		try {
 		return Double.valueOf(String.valueOf(Integer.valueOf(result.split("\\.")[0]))).equals(Double.valueOf(result))
 				? String.valueOf(Integer.valueOf(result.split("\\.")[0]))
 				: result;
+		}catch(Exception e) {
+			return result;
+		}
 	}
 }

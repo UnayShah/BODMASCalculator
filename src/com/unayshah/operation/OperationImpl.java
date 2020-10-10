@@ -22,6 +22,8 @@ public class OperationImpl implements IOperation {
 
 	@Override
 	public double divide(double A, double B) {
+		if (A == 0)
+			return Double.POSITIVE_INFINITY;
 		return B / A;
 	}
 

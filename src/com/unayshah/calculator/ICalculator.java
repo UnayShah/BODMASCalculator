@@ -9,7 +9,7 @@ public interface ICalculator {
 
 	String evaluateExpression(String expression);
 
-	void evaluate();
+	void evaluate() throws Exception;
 
 	void setExpression(String expression);
 
@@ -17,9 +17,9 @@ public interface ICalculator {
 
 	int extractStringOperator(int i, char[] tokens);
 
-	void evaluateExpressionOnParanthesisClose();
+	void evaluateExpressionOnParenthesisClose() throws Exception;
 
-	void evaluateExpression(int i, char[] tokens);
+	void evaluateExpression(int i, char[] tokens) throws Exception;
 	
 	String ConvertToIntegerIfPossible(String result);
 
