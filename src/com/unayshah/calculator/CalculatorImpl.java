@@ -64,7 +64,7 @@ public class CalculatorImpl implements ICalculator {
 		while (!operations.isEmpty()) {
 			evaluate();
 		}
-		return operands.pop();
+		return ConvertToIntegerIfPossible(operands.pop());
 	}
 
 	public int extractOperand(int i, char[] tokens) {
@@ -129,5 +129,11 @@ public class CalculatorImpl implements ICalculator {
 						operationImpl.subtract(Double.valueOf(operands.pop()), Double.valueOf(operands.pop()))));
 			break;
 		}
+	}
+
+	public String ConvertToIntegerIfPossible(String result) {
+		return Double.valueOf(String.valueOf(Integer.valueOf(result.split("\\.")[0]))).equals(Double.valueOf(result))
+				? String.valueOf(Integer.valueOf(result.split("\\.")[0]))
+				: result;
 	}
 }
