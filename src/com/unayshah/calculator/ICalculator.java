@@ -20,5 +20,7 @@ public interface ICalculator {
 	void evaluateExpressionOnParanthesisClose();
 
 	void evaluateExpression(int i, char[] tokens);
+	
+	String ConvertToIntegerIfPossible(String result);
 
 }

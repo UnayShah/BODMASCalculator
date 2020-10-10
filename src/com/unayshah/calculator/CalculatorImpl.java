@@ -124,9 +124,32 @@ public class CalculatorImpl implements ICalculator {
 					.valueOf(operationImpl.subtract(Double.valueOf(operands.pop()), Double.valueOf(operands.pop()))));
 			break;
 		case OperationConstants.SYMBOL_PERCENT:
-			if (operations.peek().equals(OperationConstants.SYMBOL_ADD))
-				addOperands(String.valueOf(
-						operationImpl.subtract(Double.valueOf(operands.pop()), Double.valueOf(operands.pop()))));
+			if (!operations.isEmpty()) {
+				if (operations.peek().equals(OperationConstants.SYMBOL_ADD)) {
+					addOperands(String.valueOf(
+							operationImpl.add(1, operationImpl.divide(100.0, Double.valueOf(operands.pop())))));
+					operations.pop();
+					addOperation("*");
+				} else if (operations.peek().equals(OperationConstants.SYMBOL_SUBTRACT)) {
+					addOperands(String.valueOf(
+							operationImpl.subtract(operationImpl.divide(100.0, Double.valueOf(operands.pop())), 1)));
+					operations.pop();
+					addOperation("*");
+				} else{
+					addOperands(String.valueOf(operationImpl.divide(100.0, Double.valueOf(operands.pop()))));
+					if(!operations.peek().equals(OperationConstants.SYMBOL_MULTIPLY) && !operations.peek().equals(OperationConstants.SYMBOL_DIVIDE)) {
+						addOperands(OperationConstants.SYMBOL_MULTIPLY);
+					}
+				}
+				
+			}
+			else {
+				addOperands(String.valueOf(operationImpl.divide(100.0, Double.valueOf(operands.pop()))));
+			}
+//			if (!operations.isEmpty()) {
+//				operations.pop();
+//				addOperation("*");
+//			}
 			break;
 		}
 	}
