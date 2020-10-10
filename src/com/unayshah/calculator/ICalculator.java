@@ -7,7 +7,18 @@ public interface ICalculator {
 
 	String evaluateExpression();
 
+	String evaluateExpression(String expression);
+
 	void evaluate();
 
 	void setExpression(String expression);
+
+	int extractOperand(int i, char[] tokens);
+
+	int extractStringOperator(int i, char[] tokens);
+
+	void evaluateExpressionOnParanthesisClose();
+
+	void evaluateExpression(int i, char[] tokens);
+
 }

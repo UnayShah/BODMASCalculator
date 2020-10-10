@@ -40,48 +40,25 @@ public class CalculatorImpl implements ICalculator {
 	}
 
 	public String evaluateExpression() {
+		return evaluateExpression(this.expression);
+	}
+
+	public String evaluateExpression(String expression) {
 		char[] tokens = expression.toCharArray();
 
 		for (int i = 0; i < tokens.length; i++) {
-
 			if (tokens[i] == ' ') {
 				continue;
 			} else if (tokens[i] >= '0' && tokens[i] <= '9') {
-				StringBuffer sbuf = new StringBuffer();
-				while (i < tokens.length && tokens[i] >= '0' && tokens[i] <= '9') {
-					sbuf.append(tokens[i]);
-					i++;
-				}
-				i--;
-				addOperands(sbuf.toString());
-			}
-
-			else if (tokens[i] >= 'a' && tokens[i] <= 'z') {
-				StringBuffer sbuf = new StringBuffer();
-				while (tokens[i] >= 'a' && tokens[i] <= 'z') {
-					sbuf.append(tokens[i]);
-					i++;
-				}
-				i--;
-				addOperation(sbuf.toString());
-			}
-
-			else if (tokens[i] == '(') {
+				i = extractOperand(i, tokens);
+			} else if (tokens[i] >= 'a' && tokens[i] <= 'z') {
+				i = extractStringOperator(i, tokens);
+			} else if (String.valueOf(tokens[i]).equals(OperationConstants.SYMBOL_PARANTHESIS_OPEN)) {
 				addOperation(String.valueOf(tokens[i]));
-			}
-
-			else if (tokens[i] == ')') {
-				while (!operations.isEmpty() && !operations.peek().equals("(")) {
-					evaluate();
-				}
-				if (!operations.isEmpty())
-					operations.pop();
+			} else if (String.valueOf(tokens[i]).equals(OperationConstants.SYMBOL_PARANTHESIS_CLOSE)) {
+				evaluateExpressionOnParanthesisClose();
 			} else {
-				while (!operations.isEmpty()
-						&& operationImpl.hasPrecedence(String.valueOf(tokens[i]), operations.peek())) {
-					evaluate();
-				}
-				addOperation(String.valueOf(tokens[i]));
+				evaluateExpression(i, tokens);
 			}
 		}
 		while (!operations.isEmpty()) {
@@ -90,8 +67,46 @@ public class CalculatorImpl implements ICalculator {
 		return operands.pop();
 	}
 
+	public int extractOperand(int i, char[] tokens) {
+		StringBuffer sbuf = new StringBuffer();
+		while (i < tokens.length && tokens[i] >= '0' && tokens[i] <= '9') {
+			sbuf.append(tokens[i]);
+			i++;
+		}
+		addOperands(sbuf.toString());
+		i--;
+		return i;
+	}
+
+	public int extractStringOperator(int i, char[] tokens) {
+		StringBuffer sbuf = new StringBuffer();
+		while (tokens[i] >= 'a' && tokens[i] <= 'z') {
+			sbuf.append(tokens[i]);
+			i++;
+		}
+		addOperation(sbuf.toString());
+		i--;
+		return i;
+	}
+
+	public void evaluateExpressionOnParanthesisClose() {
+		while (!operations.isEmpty() && !operations.peek().equals("(")) {
+			evaluate();
+		}
+		if (!operations.isEmpty())
+			operations.pop();
+	}
+
+	public void evaluateExpression(int i, char[] tokens) {
+		while (!operations.isEmpty() && operationImpl.hasPrecedence(String.valueOf(tokens[i]), operations.peek())) {
+			evaluate();
+		}
+		addOperation(String.valueOf(tokens[i]));
+	}
+
 	public void evaluate() {
-		switch (operations.pop()) {
+		String operationsTemp = operations.pop();
+		switch (operationsTemp) {
 		case OperationConstants.SYMBOL_DIVIDE:
 			addOperands(String
 					.valueOf(operationImpl.divide(Double.valueOf(operands.pop()), Double.valueOf(operands.pop()))));
@@ -107,6 +122,11 @@ public class CalculatorImpl implements ICalculator {
 		case OperationConstants.SYMBOL_SUBTRACT:
 			addOperands(String
 					.valueOf(operationImpl.subtract(Double.valueOf(operands.pop()), Double.valueOf(operands.pop()))));
+			break;
+		case OperationConstants.SYMBOL_PERCENT:
+			if (operations.peek().equals(OperationConstants.SYMBOL_ADD))
+				addOperands(String.valueOf(
+						operationImpl.subtract(Double.valueOf(operands.pop()), Double.valueOf(operands.pop()))));
 			break;
 		}
 	}

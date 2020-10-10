@@ -26,6 +26,11 @@ public class OperationImpl implements IOperation {
 	}
 
 	@Override
+	public double percent(double A) {
+		return A / 100;
+	}
+
+	@Override
 	public Integer getOperation(String operationString) {
 		switch (operationString) {
 		case OperationConstants.SYMBOL_DIVIDE:
@@ -36,11 +41,14 @@ public class OperationImpl implements IOperation {
 			return PrecedenceConstants.PRECEDENCE__ADD;
 		case OperationConstants.SYMBOL_SUBTRACT:
 			return PrecedenceConstants.PRECEDENCE_SUBTRACT;
+		case OperationConstants.SYMBOL_PERCENT:
+			return PrecedenceConstants.PRECEDENCE_PERCENT;
 		default:
 			return Integer.MIN_VALUE;
 		}
 	}
 
+	@Override
 	public boolean isParanthesis(String s) {
 		switch (s) {
 		case OperationConstants.SYMBOL_PARANTHESIS_OPEN:
